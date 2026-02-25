@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetLoom | Meeting Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles/globals.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+</head>
+
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- ─── Password Modal ─────────────────────────────────── -->
+    <div id="password-modal"
+        class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center">
+            <div class="w-14 h-14 mx-auto mb-4 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                <i class="fa-solid fa-lock text-orange-400 text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-2">Room is Protected</h2>
+            <p class="text-slate-400 text-sm mb-6">Enter the room password to join this meeting.</p>
+            <input id="password-input" type="password" placeholder="Enter password..."
+                class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 mb-4">
+            <button id="password-submit" class="btn-primary w-full py-3 rounded-xl font-semibold">Join Room</button>
+        </div>
+    </div>
+
+    <!-- ─── Top Header ──────────────────────────────────────── -->
+    <header class="w-full px-4 py-3 flex justify-between items-center glass-panel z-20 border-b border-white/5">
+        <a href="/" class="flex items-center gap-2">
+            <div
+                class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-video text-white text-xs"></i>
+            </div>
+            <!-- Custom branding: click to upload logo -->
+            <span id="brand-name" class="text-lg font-bold hidden sm:block cursor-pointer"
+                title="Click to customize branding">Meet<span class="gradient-accent">Loom</span></span>
+            <img id="brand-logo" class="hidden h-8 rounded-lg cursor-pointer" title="Click to change logo">
+            <input id="brand-upload" type="file" accept="image/*" class="hidden">
+        </a>
+        <!-- Recording Controls -->
+        <div class="flex items-center gap-3 bg-slate-800/80 rounded-full px-4 py-2 border border-white/5">
+            <div id="recording-indicator" class="hidden flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 pulse-dot"></span>
+                <span class="text-xs text-red-400 font-semibold">REC</span>
+            </div>
+            <span id="recording-timer"
+                class="font-mono text-sm font-medium w-16 text-center text-slate-400">00:00</span>
+            <span class="text-slate-600">|</span>
+            <span id="meeting-timer" class="font-mono text-xs text-slate-500 w-14 text-center"
+                title="Meeting duration">00:00</span>
+            <button id="btn-record-start"
+                class="flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-red-400 transition-colors px-3 py-1 rounded-lg hover:bg-red-500/10">
+                <i class="fa-solid fa-circle text-red-500 text-[10px]"></i> Record
+            </button>
+            <button id="btn-record-stop"
+                class="hidden flex items-center gap-2 text-sm font-semibold text-red-400 hover:text-red-300 transition-colors px-3 py-1 rounded-lg hover:bg-red-500/10">
+                <i class="fa-solid fa-stop"></i> Stop
+            </button>
+        </div>
+        <!-- Header Actions -->
+        <div class="flex items-center gap-2">
+            <span id="participant-count"
+                class="text-xs text-slate-500 bg-slate-800 px-3 py-1 rounded-full border border-white/5">
+                <i class="fa-solid fa-user text-[10px]"></i> <span id="p-count">1</span>
+            </span>
+            <button id="btn-set-password"
+                class="p-2 rounded-lg text-slate-400 hover:text-orange-400 hover:bg-orange-500/10 transition-all"
+                title="Set Room Password">
+                <i class="fa-solid fa-lock text-sm"></i>
+            </button>
+            <button id="btn-copy-link"
+                class="p-2 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all"
+                title="Copy Invite Link">
+                <i class="fa-regular fa-copy text-sm"></i>
+            </button>
+            <div id="upload-progress-container" class="hidden items-center gap-2">
+                <span class="text-xs text-blue-400 animate-pulse">Uploading...</span>
+                <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div id="upload-progress-bar" class="h-full bg-blue-500 w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ─── Main Content ───────────────────────────────────── -->
+    <main class="flex-grow p-3 md:p-4 relative">
+        <!-- Video Zoom Control (appears on hover, like Google Meet) -->
+        <div class="video-zoom-control">
+            <button class="active" data-zoom="contain" title="Fit to screen">Fit</button>
+            <button data-zoom="cover" title="Fill and crop">Fill</button>
+            <button data-zoom="fill" title="Stretch to fill">Stretch</button>
+        </div>
+
+        <div id="video-grid" class="zoom-contain">
+            <!-- Skeleton loader while webcam loads -->
+            <div id="video-skeleton" class="skeleton aspect-video rounded-2xl" style="max-width:85%;max-height:85%">
+            </div>
+        </div>
+
+        <!-- Upload Overlay -->
+        <div id="upload-overlay"
+            class="hidden absolute inset-0 bg-black/80 backdrop-blur-md z-30 flex flex-col items-center justify-center">
+            <i class="fa-solid fa-cloud-arrow-up text-5xl text-blue-500 mb-4 animate-bounce"></i>
+            <h2 class="text-2xl font-bold mb-2">Publishing to YouTube</h2>
+            <p class="text-slate-400 max-w-sm text-center">Your video is securely uploading. You'll be redirected to the
+                watch page shortly.</p>
+        </div>
+
+        <!-- Floating Reactions Container -->
+        <div id="reactions-container" class="pointer-events-none fixed inset-0 z-40"></div>
+    </main>
+
+    <!-- Numeric Zoom slider (bottom-right, appears on hover) -->
+    <div class="zoom-slider-control" id="zoom-slider">
+        <button id="zoom-out" title="Zoom Out">−</button>
+        <span id="zoom-level">100%</span>
+        <button id="zoom-in" title="Zoom In">+</button>
+    </div>
+
+    <!-- ─── Bottom Floating Toolbar ────────────────────────── -->
+    <footer
+        class="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex items-center gap-2 glass-panel px-5 py-3 rounded-2xl shadow-2xl z-20 border border-white/10">
+        <button id="btn-toggle-mic"
+            class="w-12 h-12 rounded-xl bg-slate-700/80 hover:bg-slate-600 flex items-center justify-center transition-all duration-200 group"
+            title="Toggle Mic (M)">
+            <i class="fa-solid fa-microphone group-hover:scale-110 transition-transform"></i>
+        </button>
+        <button id="btn-toggle-cam"
+            class="w-12 h-12 rounded-xl bg-slate-700/80 hover:bg-slate-600 flex items-center justify-center transition-all duration-200 group"
+            title="Toggle Camera (V)">
+            <i class="fa-solid fa-video group-hover:scale-110 transition-transform"></i>
+        </button>
+        <button id="btn-screen-share"
+            class="w-12 h-12 rounded-xl bg-slate-700/80 hover:bg-cyan-600/20 flex items-center justify-center transition-all duration-200 group text-slate-300 hover:text-cyan-400"
+            title="Share Screen (S)">
+            <i class="fa-solid fa-display group-hover:scale-110 transition-transform"></i>
+        </button>
+        <button id="btn-hand-raise"
+            class="w-12 h-12 rounded-xl bg-slate-700/80 hover:bg-yellow-500/20 flex items-center justify-center transition-all duration-200 group text-slate-300 hover:text-yellow-400"
+            title="Raise Hand (H)">
+            <i class="fa-solid fa-hand group-hover:scale-110 transition-transform"></i>
+        </button>
+
+        <div class="h-8 w-px bg-slate-700 mx-1"></div>
+
+        <!-- Reactions -->
+        <div class="flex items-center gap-1">
+            <button
+                class="reaction-btn w-10 h-10 rounded-xl hover:bg-slate-700 flex items-center justify-center text-lg transition-all hover:scale-125"
+                data-emoji="👍">👍</button>
+            <button
+                class="reaction-btn w-10 h-10 rounded-xl hover:bg-slate-700 flex items-center justify-center text-lg transition-all hover:scale-125"
+                data-emoji="❤️">❤️</button>
+            <button
+                class="reaction-btn w-10 h-10 rounded-xl hover:bg-slate-700 flex items-center justify-center text-lg transition-all hover:scale-125"
+                data-emoji="🎉">🎉</button>
+            <button
+                class="reaction-btn w-10 h-10 rounded-xl hover:bg-slate-700 flex items-center justify-center text-lg transition-all hover:scale-125"
+                data-emoji="😂">😂</button>
+            <button
+                class="reaction-btn w-10 h-10 rounded-xl hover:bg-slate-700 flex items-center justify-center text-lg transition-all hover:scale-125"
+                data-emoji="🔥">🔥</button>
+        </div>
+
+        <div class="h-8 w-px bg-slate-700 mx-1"></div>
+
+        <button id="btn-toggle-chat"
+            class="w-12 h-12 rounded-xl bg-slate-700/80 hover:bg-purple-600/20 flex items-center justify-center transition-all duration-200 group text-slate-300 hover:text-purple-400 relative"
+            title="Chat (C)">
+            <i class="fa-solid fa-comment group-hover:scale-110 transition-transform"></i>
+            <span id="chat-badge"
+                class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center">0</span>
+        </button>
+        <button id="btn-toggle-notes"
+            class="w-12 h-12 rounded-xl bg-slate-700/80 hover:bg-emerald-600/20 flex items-center justify-center transition-all duration-200 group text-slate-300 hover:text-emerald-400"
+            title="Meeting Notes (N)">
+            <i class="fa-solid fa-note-sticky group-hover:scale-110 transition-transform"></i>
+        </button>
+
+        <div class="h-8 w-px bg-slate-700 mx-1"></div>
+
+        <!-- Audio/Video Effects -->
+        <button id="btn-noise-suppress"
+            class="w-10 h-10 rounded-xl bg-slate-700/80 hover:bg-green-600/20 flex items-center justify-center transition-all duration-200 text-slate-400 hover:text-green-400 text-sm"
+            title="Noise Suppression">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </button>
+        <button id="btn-bg-blur"
+            class="w-10 h-10 rounded-xl bg-slate-700/80 hover:bg-indigo-600/20 flex items-center justify-center transition-all duration-200 text-slate-400 hover:text-indigo-400 text-sm"
+            title="Background Blur">
+            <i class="fa-solid fa-circle-half-stroke"></i>
+        </button>
+
+        <div class="h-8 w-px bg-slate-700 mx-1"></div>
+
+        <button id="btn-leave" class="btn-danger w-12 h-12 rounded-xl flex items-center justify-center"
+            title="Leave (Esc)">
+            <i class="fa-solid fa-phone-slash"></i>
+        </button>
+    </footer>
+
+    <!-- ─── Chat Panel ─────────────────────────────────────── -->
+    <aside id="chat-panel" class="chat-panel">
+        <div class="p-4 border-b border-white/5 flex justify-between items-center">
+            <h3 class="font-semibold flex items-center gap-2"><i class="fa-solid fa-comment text-purple-400"></i> Chat
+            </h3>
+            <button id="btn-close-chat" class="text-slate-400 hover:text-white transition-colors"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="chat-messages" class="chat-messages"></div>
+        <div class="p-4 border-t border-white/5">
+            <div class="flex gap-2">
+                <input id="chat-input" type="text" placeholder="Type a message..."
+                    class="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors">
+                <button id="btn-send-chat" class="btn-primary px-4 py-2.5 rounded-xl"><i
+                        class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ─── Meeting Notes Panel ──────────────────────────────── -->
+    <aside id="notes-panel" class="chat-panel">
+        <div class="p-4 border-b border-white/5 flex justify-between items-center">
+            <h3 class="font-semibold flex items-center gap-2"><i class="fa-solid fa-note-sticky text-emerald-400"></i>
+                Meeting Notes</h3>
+            <div class="flex items-center gap-2">
+                <button id="btn-download-notes" class="text-slate-400 hover:text-white transition-colors text-sm"
+                    title="Download Notes"><i class="fa-solid fa-download"></i></button>
+                <button id="btn-close-notes" class="text-slate-400 hover:text-white transition-colors"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <textarea id="notes-editor"
+            class="flex-1 w-full h-full p-4 bg-transparent text-sm text-slate-300 placeholder-slate-600 resize-none focus:outline-none"
+            placeholder="Type meeting notes here...
+Shared with everyone in the room in real-time.
+
+• Action items
+• Key decisions
+• Follow-ups"></textarea>
+    </aside>
+
+    <!-- ─── Keyboard Shortcut Toast ────────────────────────── -->
+    <div id="shortcut-toast"
+        class="hidden fixed top-20 left-1/2 transform -translate-x-1/2 bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-sm font-medium z-50 shadow-xl transition-all">
+    </div>
+
+    <script>
+        const pathParts = window.location.pathname.split('/');
+        window.ROOM_ID = pathParts[pathParts.length - 1];
+    </script>
+    <script src="/js/webrtc.js" defer></script>
+    <script src="/js/recording.js" defer></script>
+</body>
+
+</html>

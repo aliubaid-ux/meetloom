@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetLoom | Ready to Join?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles/globals.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-6">
+
+    <!-- Background Blobs -->
+    <div class="fixed top-20 left-10 w-[400px] h-[400px] bg-blue-600/10 rounded-full filter blur-[100px] animate-blob">
+    </div>
+    <div
+        class="fixed bottom-20 right-10 w-[350px] h-[350px] bg-purple-600/10 rounded-full filter blur-[100px] animate-blob-delay">
+    </div>
+
+    <div class="w-full max-w-4xl glass-panel rounded-3xl p-8 md:p-12 shadow-2xl border border-white/10 fade-in">
+        <div class="flex flex-col lg:flex-row gap-8 items-center">
+
+            <!-- Camera Preview (Left) -->
+            <div class="flex-1 w-full">
+                <div
+                    class="relative aspect-video bg-[#202124] rounded-2xl overflow-hidden shadow-xl border border-white/5">
+                    <video id="preview-video" autoplay muted playsinline class="w-full h-full object-contain"></video>
+                    <div id="cam-off-overlay"
+                        class="hidden absolute inset-0 bg-[#202124] flex items-center justify-center">
+                        <div id="avatar-preview"
+                            class="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-4xl font-bold text-white shadow-lg">
+                            ?</div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-4 mt-5">
+                    <button id="pre-toggle-mic"
+                        class="w-14 h-14 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-all text-lg"
+                        title="Toggle Microphone">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <button id="pre-toggle-cam"
+                        class="w-14 h-14 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-all text-lg"
+                        title="Toggle Camera">
+                        <i class="fa-solid fa-video"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Join Form (Right) -->
+            <div class="flex-1 w-full text-center lg:text-left">
+                <h1 class="text-3xl md:text-4xl font-bold mb-3">Ready to join?</h1>
+                <p class="text-slate-300 mb-6 text-sm">Check your camera and microphone, then enter your name.</p>
+
+                <!-- Room ID + QR Code -->
+                <div class="mb-5">
+                    <label class="text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-2">Room
+                        Name</label>
+                    <div
+                        class="flex items-center gap-2 bg-slate-800 px-4 py-3 rounded-xl border border-white/5 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/30 transition-all">
+                        <i class="fa-solid fa-link text-blue-400 text-sm"></i>
+                        <input id="room-id-input" type="text"
+                            class="text-sm font-mono text-white bg-transparent outline-none flex-1 truncate" value=""
+                            title="Edit Room Name">
+                        <button id="pre-copy-link" class="text-slate-400 hover:text-white transition-colors"
+                            title="Copy Link"><i class="fa-regular fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <!-- QR Code for mobile sharing -->
+                <div class="mb-5 flex items-center gap-4 bg-slate-800/50 rounded-xl p-3 border border-white/5">
+                    <canvas id="qr-canvas" class="w-[72px] h-[72px] rounded-lg bg-white p-1 flex-shrink-0"></canvas>
+                    <div>
+                        <p class="text-sm text-slate-300 font-medium">Share via QR</p>
+                        <p class="text-xs text-slate-400 leading-relaxed mt-0.5">Scan from phone to join this
+                            meeting on mobile instantly.</p>
+                    </div>
+                </div>
+
+                <!-- Name Input -->
+                <div class="mb-6">
+                    <label class="text-xs text-slate-400 uppercase tracking-wider font-semibold block mb-2">Your
+                        Name</label>
+                    <input id="user-name" type="text" placeholder="e.g. Ali" maxlength="20"
+                        class="w-full px-4 py-3 bg-slate-800 border border-white/10 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all text-lg">
+                </div>
+
+                <button id="btn-join-room"
+                    class="btn-primary w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl shadow-blue-500/20 group">
+                    <i class="fa-solid fa-arrow-right-to-bracket group-hover:translate-x-1 transition-transform"></i>
+                    Join Meeting
+                </button>
+
+                <div class="flex items-center justify-center gap-4 mt-4">
+                    <p class="text-xs text-slate-400">No account required</p>
+                    <a href="/recordings" class="text-xs text-blue-400 hover:text-blue-300 transition-colors"><i
+                            class="fa-solid fa-film mr-1"></i>My Recordings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pathParts = window.location.pathname.split('/');
+        let ROOM_ID = pathParts[pathParts.length - 1];
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoRecord = urlParams.get('record') === 'true';
+
+        const roomInput = document.getElementById('room-id-input');
+        roomInput.value = ROOM_ID;
+
+        function updateInviteLink() {
+            ROOM_ID = roomInput.value.trim() || 'default-room';
+            // Sanitize: lowercase, alphanumeric and hyphens
+            ROOM_ID = ROOM_ID.replace(/[^a-z0-9-]/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'default-room';
+            const inviteUrl = window.location.origin + '/join/' + ROOM_ID;
+
+            // Generate QR Code dynamically
+            try {
+                QRCode.toCanvas(document.getElementById('qr-canvas'), inviteUrl, {
+                    width: 72, margin: 1,
+                    color: { dark: '#1e293b', light: '#ffffff' }
+                });
+            } catch (e) {
+                console.error('QR error:', e);
+            }
+            return inviteUrl;
+        }
+
+        // Initial setup and listener
+        updateInviteLink();
+        roomInput.addEventListener('input', updateInviteLink);
+
+        let previewStream = null;
+        let micOn = true, camOn = true;
+
+        // Force manual .play() for video to bypass autoplay restrictions
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                previewStream = stream;
+                const videoEl = document.getElementById('preview-video');
+                videoEl.srcObject = stream;
+                videoEl.onloadedmetadata = () => videoEl.play().catch(e => console.error('Video play error:', e));
+
+                // Start mic speaking animation
+                startPrejoinMicCheck(stream);
+            })
+            .catch(() => document.getElementById('cam-off-overlay').classList.remove('hidden'));
+
+        let preAudioCtx, preAnalyser, preMicSource, preVolArray;
+        function startPrejoinMicCheck(stream) {
+            try {
+                if (!preAudioCtx) preAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (preAudioCtx.state === 'suspended') preAudioCtx.resume();
+                preAnalyser = preAudioCtx.createAnalyser();
+                preAnalyser.smoothingTimeConstant = 0.5;
+                preAnalyser.fftSize = 256;
+                preMicSource = preAudioCtx.createMediaStreamSource(stream);
+                preMicSource.connect(preAnalyser);
+                preVolArray = new Uint8Array(preAnalyser.frequencyBinCount);
+
+                const btn = document.getElementById('pre-toggle-mic');
+                function measure() {
+                    if (!micOn) {
+                        btn.style.boxShadow = 'none';
+                        requestAnimationFrame(measure);
+                        return;
+                    }
+                    preAnalyser.getByteFrequencyData(preVolArray);
+                    let sum = 0;
+                    for (let i = 0; i < preVolArray.length; i++) sum += preVolArray[i];
+                    let avg = sum / preVolArray.length;
+
+                    if (avg > 10) {
+                        const glow = Math.min(avg / 2, 20);
+                        btn.style.boxShadow = `0 0 ${glow}px ${glow / 2}px rgba(59, 130, 246, 0.6)`;
+                    } else {
+                        btn.style.boxShadow = 'none';
+                    }
+                    requestAnimationFrame(measure);
+                }
+                measure();
+            } catch (e) { console.warn('Audio check error', e); }
+        }
+
+        document.getElementById('pre-toggle-mic').addEventListener('click', function () {
+            if (!previewStream) return;
+            const t = previewStream.getAudioTracks()[0]; t.enabled = !t.enabled; micOn = t.enabled;
+            this.innerHTML = micOn ? '<i class="fa-solid fa-microphone"></i>' : '<i class="fa-solid fa-microphone-slash text-red-400"></i>';
+            this.classList.toggle('!bg-red-500/20', !micOn);
+        });
+
+        document.getElementById('pre-toggle-cam').addEventListener('click', function () {
+            if (!previewStream) return;
+            const t = previewStream.getVideoTracks()[0]; t.enabled = !t.enabled; camOn = t.enabled;
+            this.innerHTML = camOn ? '<i class="fa-solid fa-video"></i>' : '<i class="fa-solid fa-video-slash text-red-400"></i>';
+            this.classList.toggle('!bg-red-500/20', !camOn);
+            document.getElementById('cam-off-overlay').classList.toggle('hidden', camOn);
+        });
+
+        document.getElementById('pre-copy-link').addEventListener('click', () => {
+            const link = updateInviteLink();
+            navigator.clipboard.writeText(link);
+            document.getElementById('pre-copy-link').innerHTML = '<i class="fa-solid fa-check text-green-400"></i>';
+            setTimeout(() => document.getElementById('pre-copy-link').innerHTML = '<i class="fa-regular fa-copy"></i>', 2000);
+        });
+
+        document.getElementById('user-name').addEventListener('input', function () {
+            document.getElementById('avatar-preview').textContent = this.value.trim().charAt(0).toUpperCase() || '?';
+        });
+
+        document.getElementById('btn-join-room').addEventListener('click', () => {
+            const name = document.getElementById('user-name').value.trim() || 'Guest';
+            ROOM_ID = roomInput.value.trim() || 'default-room';
+            ROOM_ID = ROOM_ID.replace(/[^a-z0-9-]/gi, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'default-room';
+
+            if (previewStream) previewStream.getTracks().forEach(t => t.stop());
+            const p = new URLSearchParams();
+            p.set('name', name); p.set('mic', micOn); p.set('cam', camOn);
+            if (autoRecord) p.set('record', 'true');
+            window.location.href = `/room/${ROOM_ID}?${p.toString()}`;
+        });
+
+        document.getElementById('user-name').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('btn-join-room').click(); });
+        roomInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('user-name').focus(); });
+
+        document.getElementById('user-name').focus();
+    </script>
+</body>
+
+</html>

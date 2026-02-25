@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetLoom | My Recordings</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles/globals.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="w-full p-4 flex justify-between items-center glass-panel border-b border-white/5 z-10">
+        <a href="/" class="flex items-center gap-2">
+            <div
+                class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-video text-white text-xs"></i>
+            </div>
+            <span class="text-lg font-bold">Quick<span class="gradient-accent">Meet</span></span>
+        </a>
+        <div class="flex items-center gap-3">
+            <a href="/create-room"
+                class="btn-primary px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> New Meeting
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-10 max-w-6xl">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+            <div>
+                <h1 class="text-3xl font-bold mb-1">My Recordings</h1>
+                <p class="text-slate-500 text-sm">Your recent screen recordings, saved locally in this browser.</p>
+            </div>
+            <button id="btn-clear-all"
+                class="text-xs text-slate-500 hover:text-red-400 transition-colors border border-slate-700 hover:border-red-500/30 px-4 py-2 rounded-lg">
+                <i class="fa-solid fa-trash-can mr-1"></i> Clear History
+            </button>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden flex flex-col items-center justify-center py-24 text-center">
+            <div
+                class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center mb-6">
+                <i class="fa-solid fa-film text-3xl text-blue-400"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-2">No recordings yet</h2>
+            <p class="text-slate-500 text-sm max-w-sm mb-6">Start a meeting and hit Record to capture your first video.
+                It'll show up here with a thumbnail.</p>
+            <a href="/create-room"
+                class="btn-primary px-8 py-3 rounded-xl font-semibold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-video"></i> Start Recording
+            </a>
+        </div>
+
+        <!-- Recordings Grid -->
+        <div id="recordings-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamically populated -->
+        </div>
+    </main>
+
+    <script>
+        const grid = document.getElementById('recordings-grid');
+        const emptyState = document.getElementById('empty-state');
+        const btnClear = document.getElementById('btn-clear-all');
+
+        function loadRecordings() {
+            const recordings = JSON.parse(localStorage.getItem('quickmeet_recordings') || '[]');
+            grid.innerHTML = '';
+
+            if (recordings.length === 0) {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+
+            // Sort by date descending
+            recordings.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            recordings.forEach((rec, i) => {
+                const date = new Date(rec.date);
+                const timeAgo = getTimeAgo(date);
+                const thumbnail = rec.videoId
+                    ? `https://img.youtube.com/vi/${rec.videoId}/hqdefault.jpg`
+                    : '';
+
+                const card = document.createElement('div');
+                card.className = 'group bg-slate-800/50 rounded-2xl border border-white/5 overflow-hidden hover:border-blue-500/20 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/5';
+                card.innerHTML = `
+                    <!-- Thumbnail -->
+                    <a href="/watch/${rec.videoId}" class="block relative aspect-video bg-[#202124] overflow-hidden">
+                        ${thumbnail
+                        ? `<img src="${thumbnail}" alt="Recording thumbnail" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">`
+                        : `<div class="w-full h-full flex items-center justify-center"><i class="fa-solid fa-play text-3xl text-slate-600"></i></div>`
+                    }
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-[10px] font-mono px-2 py-1 rounded-md">
+                            ${rec.duration || '--:--'}
+                        </div>
+                        <!-- Play overlay -->
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                <i class="fa-solid fa-play text-white text-lg ml-1"></i>
+                            </div>
+                        </div>
+                    </a>
+
+                    <!-- Meta -->
+                    <div class="p-4">
+                        <h3 class="font-semibold text-sm truncate mb-1">${rec.title || 'MeetLoom Recording'}</h3>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-slate-500 flex items-center gap-1">
+                                <i class="fa-regular fa-clock text-[10px]"></i> ${timeAgo}
+                            </span>
+                            <div class="flex items-center gap-1">
+                                <a href="/watch/${rec.videoId}" class="text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded hover:bg-blue-500/10 transition-all">Watch</a>
+                                <button onclick="removeRecording(${i})" class="text-xs text-slate-500 hover:text-red-400 px-2 py-1 rounded hover:bg-red-500/10 transition-all">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
+            return date.toLocaleDateString();
+        }
+
+        function removeRecording(index) {
+            const recordings = JSON.parse(localStorage.getItem('quickmeet_recordings') || '[]');
+            recordings.splice(index, 1);
+            localStorage.setItem('quickmeet_recordings', JSON.stringify(recordings));
+            loadRecordings();
+        }
+
+        btnClear.addEventListener('click', () => {
+            if (confirm('Clear all recording history? This only removes items from this browser — your YouTube videos are not affected.')) {
+                localStorage.removeItem('quickmeet_recordings');
+                loadRecordings();
+            }
+        });
+
+        loadRecordings();
+    </script>
+</body>
+
+</html>

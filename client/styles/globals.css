@@ -1,0 +1,645 @@
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ─── CSS Variables ─── */
+:root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #111827;
+    --bg-card: #1e293b;
+    --bg-card-hover: #253147;
+    --accent-blue: #3b82f6;
+    --accent-purple: #8b5cf6;
+    --accent-pink: #ec4899;
+    --accent-emerald: #10b981;
+    --accent-red: #ef4444;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(30, 41, 59, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ─── Reset & Base ─── */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ─── Glass Panel ─── */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+}
+
+/* ─── Gradient Texts ─── */
+.hero-gradient {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-accent {
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ─── Buttons ─── */
+.btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.5);
+}
+
+.btn-primary:hover::after {
+    opacity: 1;
+}
+
+.btn-secondary {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-blue);
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.5);
+}
+
+/* ─── Animations ─── */
+.fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    opacity: 0;
+}
+
+.fade-in-delay-1 {
+    animation-delay: 0.15s;
+}
+
+.fade-in-delay-2 {
+    animation-delay: 0.3s;
+}
+
+.fade-in-delay-3 {
+    animation-delay: 0.45s;
+}
+
+.fade-in-delay-4 {
+    animation-delay: 0.6s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes blob {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes logoPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.4), 0 0 30px rgba(59, 130, 246, 0.3);
+    }
+
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px rgba(139, 92, 246, 0.6), 0 0 50px rgba(59, 130, 246, 0.5);
+    }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-blob {
+    animation: blob 8s ease-in-out infinite;
+}
+
+.animate-blob-delay {
+    animation: blob 8s ease-in-out infinite 2s;
+}
+
+.animate-blob-delay-2 {
+    animation: blob 8s ease-in-out infinite 4s;
+}
+
+/* ─── Skeleton Loader ─── */
+.skeleton {
+    background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 37%, var(--bg-card) 63%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+/* ─── Video Grid (Google Meet Style) ─── */
+#video-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    padding: 0.5rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Force main to fill remaining viewport height */
+main.flex-grow {
+    overflow: hidden;
+    max-height: calc(100vh - 60px);
+    /* header height */
+}
+
+/* Single participant: centered, contained */
+#video-grid .relative:only-child {
+    max-width: 85%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+}
+
+#video-grid .relative:only-child video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 2 participants */
+#video-grid .relative:first-child:nth-last-child(2),
+#video-grid .relative:first-child:nth-last-child(2)~.relative {
+    max-width: 48%;
+    max-height: 80%;
+}
+
+/* 3-4 participants: 2x2 grid */
+#video-grid.participants-3,
+#video-grid.participants-4 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+}
+
+/* 5+ participants */
+#video-grid.participants-many {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    align-items: stretch;
+}
+
+/* Screen share mode: large screen + small sidebar */
+#video-grid.has-screen-share {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    align-items: stretch;
+}
+
+#video-grid video,
+#video-grid .video-wrapper {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    background-color: #202124;
+    transition: all 0.3s ease;
+}
+
+/* Zoom options — target videos inside wrapper divs */
+#video-grid.zoom-cover video {
+    object-fit: cover !important;
+}
+
+#video-grid.zoom-contain video {
+    object-fit: contain !important;
+}
+
+#video-grid.zoom-fill video {
+    object-fit: fill !important;
+}
+
+#video-grid video:hover {
+    box-shadow: 0 12px 48px rgba(59, 130, 246, 0.15);
+}
+
+/* ─── Video Zoom Control ─── */
+.video-zoom-control {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 15;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+    display: flex;
+    gap: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+main:hover .video-zoom-control {
+    opacity: 1;
+}
+
+.video-zoom-control button {
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.375rem;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.7rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.video-zoom-control button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.video-zoom-control button.active {
+    background: var(--accent-blue);
+    color: white;
+}
+
+/* ─── Numeric Zoom Slider ─── */
+.zoom-slider-control {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1rem;
+    z-index: 25;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+main:hover~.zoom-slider-control,
+.zoom-slider-control:hover {
+    opacity: 1;
+}
+
+.zoom-slider-control button {
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 0.35rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.zoom-slider-control button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+}
+
+.zoom-slider-control span {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #94a3b8;
+    min-width: 2.2rem;
+    text-align: center;
+    user-select: none;
+}
+
+/* ─── Pulse Dot (Recording indicator) ─── */
+.pulse-dot {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+/* ─── Chat Panel ─── */
+.chat-panel {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 380px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    border-left: 1px solid var(--border-color);
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-panel.open {
+    right: 0;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.chat-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+    background: var(--bg-card);
+    max-width: 85%;
+    word-wrap: break-word;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.chat-bubble .sender {
+    font-size: 0.7rem;
+    color: var(--accent-blue);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.chat-bubble .text {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.chat-bubble .time {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* ─── Emoji Reaction Flyout ─── */
+.reaction-float {
+    position: fixed;
+    bottom: 120px;
+    font-size: 2.5rem;
+    animation: reactionFly 2s ease-out forwards;
+    z-index: 100;
+    pointer-events: none;
+}
+
+@keyframes reactionFly {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-200px) scale(1.5);
+    }
+}
+
+/* ─── Feature Cards (Homepage) ─── */
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.feature-card:hover::before {
+    opacity: 1;
+}
+
+.feature-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ─── Comparison Table ─── */
+.comparison-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.comparison-table th {
+    background: var(--bg-card);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comparison-table td {
+    padding: 0.875rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+}
+
+.comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
+.comparison-table tr:hover td {
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.comparison-table .highlight-col {
+    background: rgba(59, 130, 246, 0.08);
+    border-left: 2px solid var(--accent-blue);
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+    .chat-panel {
+        width: 100%;
+        right: -100%;
+    }
+
+    #video-grid {
+        grid-template-columns: 1fr !important;
+    }
+}

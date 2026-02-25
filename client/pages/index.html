@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetLoom — Free Meetings, Instant Recording, Auto Transcripts</title>
+    <meta name="description"
+        content="The premium hybrid of Google Meet and Loom. Jump into live rooms or record Loom-style videos — free forever with YouTube-powered storage and AI transcripts.">
+    <meta property="og:title" content="MeetLoom — Meet + Record + Share">
+    <meta property="og:description" content="Free meetings, instant recording, auto transcripts. No account needed.">
+    <meta property="og:type" content="website">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles/globals.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- ─── Navbar ──────────────────────────────────────────── -->
+    <nav class="fixed w-full top-0 z-50 glass-panel border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-violet-500/25 animate-[spin_8s_linear_infinite]"
+                    style="animation: logoPulse 3s ease-in-out infinite;">
+                    <i class="fa-solid fa-video text-white text-sm"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight">Meet<span class="hero-gradient">Loom</span></span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm text-slate-400">
+                <a href="#features" class="hover:text-white transition-colors">Features</a>
+                <a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a>
+                <a href="#compare" class="hover:text-white transition-colors">Compare</a>
+                <a href="/recordings" class="hover:text-white transition-colors flex items-center gap-1"><i
+                        class="fa-solid fa-film text-[10px]"></i> My Recordings</a>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/create-room"
+                    class="btn-primary px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Start Free
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ─── Hero Section ─────────────────────────────────────── -->
+    <section class="relative pt-32 pb-24 px-6 overflow-hidden">
+        <!-- Animated Background Blobs -->
+        <div
+            class="absolute top-20 left-10 w-[500px] h-[500px] bg-blue-600/20 rounded-full filter blur-[120px] animate-blob">
+        </div>
+        <div
+            class="absolute top-40 right-10 w-[400px] h-[400px] bg-purple-600/20 rounded-full filter blur-[120px] animate-blob-delay">
+        </div>
+        <div
+            class="absolute bottom-0 left-1/3 w-[350px] h-[350px] bg-pink-500/15 rounded-full filter blur-[100px] animate-blob-delay-2">
+        </div>
+
+        <div class="relative z-10 max-w-5xl mx-auto text-center">
+            <!-- Badge -->
+            <div
+                class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5 mb-8 fade-in">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-sm text-slate-300">100% Free • No Account • Open Source</span>
+            </div>
+
+            <h1
+                class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1] mb-8 fade-in fade-in-delay-1">
+                Meet naturally.<br>
+                <span class="hero-gradient">Record instantly.</span><br>
+                Share everywhere.
+            </h1>
+
+            <p
+                class="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed fade-in fade-in-delay-2">
+                The premium hybrid of Google Meet and Loom. Jump into a live video call, record your screen with one
+                click, and get free AI-powered transcripts — all stored on YouTube at zero cost.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 fade-in fade-in-delay-3">
+                <a href="/create-room"
+                    class="btn-primary w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl shadow-blue-500/25">
+                    <i class="fa-solid fa-video"></i>
+                    Start a Meeting
+                </a>
+                <a href="/create-room?record=true"
+                    class="btn-secondary w-full sm:w-auto px-10 py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-circle text-red-500 text-sm"></i>
+                    Record a Video
+                </a>
+            </div>
+
+            <!-- Custom Room Name -->
+            <div class="mt-8 fade-in fade-in-delay-4">
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <div class="h-px w-12 bg-slate-700"></div>
+                    <span class="text-xs text-slate-500 uppercase tracking-wider font-semibold">or choose your own room
+                        name</span>
+                    <div class="h-px w-12 bg-slate-700"></div>
+                </div>
+                <form action="/join-custom" method="POST"
+                    class="flex items-center justify-center gap-2 max-w-md mx-auto">
+                    <div class="flex-1 relative">
+                        <span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-sm select-none hidden sm:inline">meetloom.app/</span>
+                        <input type="text" name="roomName" placeholder="team-standup" maxlength="40"
+                            class="w-full pl-4 sm:pl-[7.5rem] pr-4 py-3.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all text-sm font-mono">
+                    </div>
+                    <button type="submit"
+                        class="btn-primary px-6 py-3.5 rounded-xl font-semibold text-sm whitespace-nowrap flex items-center gap-2 shadow-lg shadow-blue-500/15">
+                        <i class="fa-solid fa-arrow-right"></i> Go
+                    </button>
+                </form>
+                <p class="text-[11px] text-slate-600 mt-2 text-center"><i class="fa-solid fa-clock text-[9px]"></i>
+                    Rooms auto-expire after 24 hours • Letters, numbers, and hyphens only</p>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16 fade-in fade-in-delay-4">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">∞</div>
+                    <div class="text-sm text-slate-500 mt-1">Free Storage</div>
+                </div>
+                <div class="w-px h-10 bg-slate-800"></div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">0ms</div>
+                    <div class="text-sm text-slate-500 mt-1">Setup Time</div>
+                </div>
+                <div class="w-px h-10 bg-slate-800"></div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">AI</div>
+                    <div class="text-sm text-slate-500 mt-1">Auto Transcripts</div>
+                </div>
+                <div class="w-px h-10 bg-slate-800"></div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-white">$0</div>
+                    <div class="text-sm text-slate-500 mt-1">Forever</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Features Grid ────────────────────────────────────── -->
+    <section id="features" class="py-24 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-sm font-semibold text-blue-400 uppercase tracking-wider">Features</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3 mb-4">Everything you need.<br><span
+                        class="text-slate-500">Nothing you don't.</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Feature 1: Live Meetings -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-blue-500/10 text-blue-400"><i class="fa-solid fa-users"></i></div>
+                    <h3 class="text-lg font-bold mb-2">Live Video Meetings</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Peer-to-peer WebRTC calls with adaptive grid
+                        layouts. Invite anyone with a link — no downloads, no accounts.</p>
+                </div>
+
+                <!-- Feature 2: Screen Recording -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-red-500/10 text-red-400"><i class="fa-solid fa-record-vinyl"></i></div>
+                    <h3 class="text-lg font-bold mb-2">Instant Screen Recording</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Capture your screen, webcam, and microphone
+                        simultaneously. One click to start, one click to publish.</p>
+                </div>
+
+                <!-- Feature 3: Auto Transcripts -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">AI-Powered Transcripts</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Powered by YouTube's world-class ASR engine.
+                        Automatic captions and downloadable transcripts — completely free.</p>
+                </div>
+
+                <!-- Feature 4: Chat -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-purple-500/10 text-purple-400"><i class="fa-solid fa-comments"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">In-Room Chat</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Real-time messaging during meetings. Share links,
+                        notes, and context without interrupting the conversation.</p>
+                </div>
+
+                <!-- Feature 5: Reactions -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-yellow-500/10 text-yellow-400"><i class="fa-solid fa-face-smile"></i>
+                    </div>
+                    <h3 class="text-lg font-bold mb-2">Emoji Reactions</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">React with 👍 ❤️ 🎉 😂 🔥 without unmuting.
+                        Floating animations make calls feel alive and engaging.</p>
+                </div>
+
+                <!-- Feature 6: Screen Share -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-cyan-500/10 text-cyan-400"><i class="fa-solid fa-display"></i></div>
+                    <h3 class="text-lg font-bold mb-2">Live Screen Sharing</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Share your screen with all participants during the
+                        meeting with adaptive spotlight layout.</p>
+                </div>
+
+                <!-- Feature 7: Watch Page -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-pink-500/10 text-pink-400"><i class="fa-solid fa-play"></i></div>
+                    <h3 class="text-lg font-bold mb-2">Loom-Style Watch Page</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Beautiful video playback with side-by-side
+                        transcript. Copy share link, download transcript as .txt.</p>
+                </div>
+
+                <!-- Feature 8: Password Rooms -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-orange-500/10 text-orange-400"><i class="fa-solid fa-lock"></i></div>
+                    <h3 class="text-lg font-bold mb-2">Password-Protected Rooms</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Set a PIN for your meeting room. Only people with
+                        the code can join — simple and effective security.</p>
+                </div>
+
+                <!-- Feature 9: Keyboard Shortcuts -->
+                <div class="feature-card">
+                    <div class="feature-icon bg-teal-500/10 text-teal-400"><i class="fa-solid fa-keyboard"></i></div>
+                    <h3 class="text-lg font-bold mb-2">Keyboard Shortcuts</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Toggle mic (M), camera (V), chat (C), and more.
+                        Power-user friendly controls for seamless flow.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── How It Works ─────────────────────────────────────── -->
+    <section id="how-it-works" class="py-24 px-6 relative">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-blue-600/5 to-transparent"></div>
+        <div class="relative max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-sm font-semibold text-purple-400 uppercase tracking-wider">How It Works</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3">Three steps. <span class="text-slate-500">That's
+                        it.</span></h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div
+                        class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-blue-500/25">
+                        1</div>
+                    <h3 class="text-xl font-bold mb-3">Start or Join</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Click "Start a Meeting" to create a room
+                        instantly. Share the link with anyone to invite them.</p>
+                </div>
+                <div class="text-center">
+                    <div
+                        class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-purple-500/25">
+                        2</div>
+                    <h3 class="text-xl font-bold mb-3">Meet or Record</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Have a live conversation with WebRTC, or hit
+                        Record to capture your screen, webcam, and audio.</p>
+                </div>
+                <div class="text-center">
+                    <div
+                        class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 flex items-center justify-center text-2xl font-black text-white shadow-lg shadow-pink-500/25">
+                        3</div>
+                    <h3 class="text-xl font-bold mb-3">Share Instantly</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Your video uploads to YouTube. Get a shareable
+                        watch page with auto-generated AI transcripts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Comparison Table ──────────────────────────────────── -->
+    <section id="compare" class="py-24 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+                <span class="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Compare</span>
+                <h2 class="text-4xl md:text-5xl font-bold mt-3">Why MeetLoom <span class="text-slate-500">wins.</span>
+                </h2>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Google Meet</th>
+                            <th>Loom</th>
+                            <th class="highlight-col">MeetLoom ✨</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-medium text-slate-300">Live video calls</td>
+                            <td><i class="fa-solid fa-check text-emerald-400"></i></td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">Screen recording</td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td><i class="fa-solid fa-check text-emerald-400"></i></td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">AI transcripts</td>
+                            <td>Live only</td>
+                            <td>Paid plan</td>
+                            <td class="highlight-col"><span class="text-emerald-400 font-semibold">Free forever</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">In-room chat</td>
+                            <td><i class="fa-solid fa-check text-emerald-400"></i></td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">Emoji reactions</td>
+                            <td><i class="fa-solid fa-check text-emerald-400"></i></td>
+                            <td>On video</td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">No account needed</td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">Storage cost</td>
+                            <td>Google Drive</td>
+                            <td>$15/mo+</td>
+                            <td class="highlight-col"><span class="text-emerald-400 font-semibold">$0 (YouTube)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">Open source</td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td><i class="fa-solid fa-xmark text-slate-600"></i></td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium text-slate-300">Password rooms</td>
+                            <td>Require login</td>
+                            <td>N/A</td>
+                            <td class="highlight-col"><i class="fa-solid fa-check text-emerald-400"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── CTA Section ──────────────────────────────────────── -->
+    <section class="py-24 px-6 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 via-purple-600/10 to-pink-600/10"></div>
+        <div class="relative max-w-3xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Ready to ditch<br><span class="hero-gradient">expensive
+                    tools?</span></h2>
+            <p class="text-slate-400 text-lg mb-10 max-w-xl mx-auto">Start your first meeting or recording in seconds.
+                No credit card, no signup, no strings attached.</p>
+            <a href="/create-room"
+                class="btn-primary inline-flex items-center gap-3 px-12 py-5 rounded-2xl font-bold text-lg shadow-2xl shadow-blue-500/25 group">
+                <i class="fa-solid fa-rocket group-hover:animate-bounce"></i>
+                Launch MeetLoom — It's Free
+            </a>
+        </div>
+    </section>
+
+    <!-- ─── Footer ───────────────────────────────────────────── -->
+    <footer class="border-t border-white/5 py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-400 flex items-center justify-center">
+                    <i class="fa-solid fa-video text-white text-xs"></i>
+                </div>
+                <span class="font-bold text-sm">MeetLoom</span>
+                <span class="text-slate-600 text-sm">• Premium Meeting Platform</span>
+            </div>
+            <div class="flex items-center gap-6 text-sm text-slate-500">
+                <a href="/recordings" class="hover:text-white transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-film"></i> My Recordings
+                </a>
+                <span>Built with ❤️ and WebRTC</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Smooth scroll behavior -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+
+</html>
