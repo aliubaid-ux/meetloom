@@ -72,7 +72,7 @@
 
                 <!-- QR Code for mobile sharing -->
                 <div class="mb-5 flex items-center gap-4 bg-slate-800/50 rounded-xl p-3 border border-white/5">
-                    <canvas id="qr-canvas" class="w-[72px] h-[72px] rounded-lg bg-white p-1 flex-shrink-0"></canvas>
+                    <img id="qr-image" class="w-[72px] h-[72px] rounded-lg bg-white p-1 flex-shrink-0" alt="QR Code">
                     <div>
                         <p class="text-sm text-slate-300 font-medium">Share via QR</p>
                         <p class="text-xs text-slate-400 leading-relaxed mt-0.5">Scan from phone to join this
@@ -119,13 +119,19 @@
             const inviteUrl = window.location.origin + '/join/' + ROOM_ID;
 
             // Generate QR Code dynamically
-            try {
-                QRCode.toCanvas(document.getElementById('qr-canvas'), inviteUrl, {
-                    width: 72, margin: 1,
+            const qrImg = document.getElementById('qr-image');
+            if (typeof QRCode !== 'undefined' && QRCode.toDataURL) {
+                QRCode.toDataURL(inviteUrl, {
+                    width: 144, margin: 1,
                     color: { dark: '#1e293b', light: '#ffffff' }
+                }).then(url => { qrImg.src = url; })
+                  .catch(e => {
+                    console.warn('QRCode lib failed, using fallback:', e);
+                    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=144x144&data=${encodeURIComponent(inviteUrl)}`;
                 });
-            } catch (e) {
-                console.error('QR error:', e);
+            } else {
+                // Fallback: use a free QR code API
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=144x144&data=${encodeURIComponent(inviteUrl)}`;
             }
             return inviteUrl;
         }
