@@ -5,7 +5,27 @@ const videoSkeleton = document.getElementById('video-skeleton');
 const myVideo = document.createElement('video');
 myVideo.muted = true;
 
-const myPeer = new Peer();
+const myPeer = new Peer(undefined, {
+    config: {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+            { urls: 'stun:global.stun.twilio.com:3478' }
+        ]
+    }
+});
+
+// PeerJS error handling
+myPeer.on('error', err => {
+    console.error('PeerJS error:', err.type, err);
+    if (err.type === 'network' || err.type === 'server-error') {
+        showToast('Connection issue — retrying...');
+        setTimeout(() => myPeer.reconnect(), 3000);
+    }
+});
 const peers = {};
 let myStream;
 let screenStream = null;
@@ -103,7 +123,12 @@ navigator.mediaDevices.getUserMedia({ video: true, audio: true })
         myPeer.on('call', call => {
             call.answer(stream);
             const video = document.createElement('video');
-            call.on('stream', userVideoStream => addVideoStream(video, userVideoStream, call.metadata?.name || 'Peer'));
+            const peerId = call.peer;
+            call.on('stream', userVideoStream => {
+                // Prevent duplicate video tiles for the same peer
+                if (document.getElementById(`video-${peerId}`)) return;
+                addVideoStream(video, userVideoStream, call.metadata?.name || 'Peer', false, peerId);
+            });
         });
 
         socket.on('user-connected', (userId, userName) => {
@@ -191,12 +216,21 @@ myPeer.on('open', id => {
 });
 
 function connectToNewUser(userId, stream, userName) {
+    // Prevent duplicate connections
+    if (peers[userId]) return;
     const call = myPeer.call(userId, stream, { metadata: { name: MY_NAME } });
     const video = document.createElement('video');
-    call.on('stream', userVideoStream => addVideoStream(video, userVideoStream, userName || 'Peer', false, userId));
+    call.on('stream', userVideoStream => {
+        // Prevent duplicate video tiles
+        if (document.getElementById(`video-${userId}`)) return;
+        addVideoStream(video, userVideoStream, userName || 'Peer', false, userId);
+    });
     call.on('close', () => {
         const wrapper = document.getElementById(`video-${userId}`);
         if (wrapper) wrapper.remove();
+    });
+    call.on('error', err => {
+        console.error(`Call error with ${userId}:`, err);
     });
     peers[userId] = call;
 }
@@ -624,38 +658,42 @@ document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key === '0') { e.preventDefault(); applyZoom(100); }
 });
 
-// ─── Auto-Hide Bottom Toolbar ──────────────────────────────
+// ─── Auto-Hide Bottom Toolbar (disabled on touch/mobile) ───
 const toolbar = document.querySelector('footer.fixed');
 let toolbarTimer = null;
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
 function showToolbar() {
     if (toolbar) {
         toolbar.style.opacity = '1';
         toolbar.style.pointerEvents = 'auto';
         toolbar.style.transform = 'translate(-50%, 0)';
     }
-    clearTimeout(toolbarTimer);
-    toolbarTimer = setTimeout(hideToolbar, 3500);
+    if (!isTouchDevice) {
+        clearTimeout(toolbarTimer);
+        toolbarTimer = setTimeout(hideToolbar, 3500);
+    }
 }
 function hideToolbar() {
-    // Don't hide if mouse is over toolbar
+    if (isTouchDevice) return; // Never auto-hide on mobile
     if (toolbar && !toolbar.matches(':hover')) {
         toolbar.style.opacity = '0';
         toolbar.style.pointerEvents = 'none';
         toolbar.style.transform = 'translate(-50%, 20px)';
     }
 }
-// Set transition on toolbar
 if (toolbar) {
     toolbar.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-    toolbar.addEventListener('mouseenter', () => {
-        clearTimeout(toolbarTimer);
-        showToolbar();
-    });
-    toolbar.addEventListener('mouseleave', () => {
-        toolbarTimer = setTimeout(hideToolbar, 2000);
-    });
+    if (!isTouchDevice) {
+        toolbar.addEventListener('mouseenter', () => {
+            clearTimeout(toolbarTimer);
+            showToolbar();
+        });
+        toolbar.addEventListener('mouseleave', () => {
+            toolbarTimer = setTimeout(hideToolbar, 2000);
+        });
+        document.addEventListener('mousemove', showToolbar);
+    }
 }
-document.addEventListener('mousemove', showToolbar);
 document.addEventListener('keydown', showToolbar);
-// Initial show
 showToolbar();

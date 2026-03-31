@@ -12,9 +12,9 @@ services:
         value: "3000"
       - key: SESSION_SECRET
         generateValue: true
-      - key: CLIENT_ID
+      - key: GOOGLE_CLIENT_ID
         sync: false
-      - key: CLIENT_SECRET
+      - key: GOOGLE_CLIENT_SECRET
         sync: false
-      - key: REDIRECT_URI
+      - key: GOOGLE_REDIRECT_URI
         sync: false
